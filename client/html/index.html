@@ -1,0 +1,116 @@
+{{header}}
+<div id="canvas-container"></div>
+<div id="content-container">
+  <div class="lightbox-bg"></div>
+  <div class="lightbox">
+    <h1>Epicycles</h1>
+    <h2>Background</h2>
+    <div class="col-md-9">
+      Back when the earth was the center of the universe, it was believed that
+      the ground underneath us was stationary and the entire universe revolves
+      around us. Afterall, we don't <i>seem</i> to be moving while the celestial
+      bodies in the night sky are all spinning around us. We expected all the
+      bodies to be in a roughly circular orbit around the earth
+    </div>
+    <iframe width="320" height="300" class="embed-demo"
+ src="/epicycles/AAAAAAAA8D8AAAAAAABZQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA..?embed=1&scale=.5&bigpen=1"></iframe>
+    <div class="col-md-9">
+      However, we noticed that there were some celestial bodies that moved in
+      an odd motion. They seemed to move roughly in a circular orbit, but
+      sometimes move backwards, in a retrograde orbit. These bodies are the other
+      planets that revolve around the sun. We now know that this apparant motion
+      is due to the fact that the earth is also revolving around the sun.
+
+      A smart guy named Ptolemy noticed that he could model the motion of
+      planets by using a model with epicycles. Planets seemed to revolve around
+      a point that was itself revolving. The assumed model for how planets
+      moved was like this:
+    </div>
+    <iframe width="320" height="300" class="embed-demo" src="/epicycles/AAAAAAAA8D8AAAAAAAA0QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABZQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA..?embed=1&scale=.5&bigpen=1"></iframe>
+    <p>
+      Notice that the planets do occasionally move back in retrograde motion when
+      you're looking from inside the circle.
+    </p>
+
+    <h2>Math behind Using Epicycles to trace any path</h2>
+    <p>
+      A complex number can be represented as a combination of real and imaginary
+      parts, <eq>a + ib</eq>, but it can also be represented by its magnitude
+      and phase. Euler's formula gives the relation:
+      <eq>re^{i\theta}=rcos(\theta)+irsin(\theta)</eq>. This is the more
+      general formula of <eq>e^{i\pi}=-1</eq>. Because the magnitude of
+      <eq>a+ib</eq> is <eq>\sqrt{a^{2}+b^{2}}</eq> and the phase of
+      <eq>a+ib</eq> is <eq>atan2(b,a)</eq>, <eq>re^{i\theta}</eq>
+      can be used to represent a complex number with magniutde <eq>r</eq> and
+      phase <eq>\theta</eq>.
+    </p>
+    <p>
+      A circle on the imaginary plane can be represented by a complex number as
+      the center <eq>x + iy</eq> and a radius <eq>r</eq>. A point traveling
+      along this circle requires a few additional parameters. We need to know
+      it's angular velocity <eq>\omega=2\pi f</eq> where <eq>f</eq> is the point's
+      frequency, how many times it makes a complete orbit every second. Lastly,
+      we must also know the point's starting position along the circle at time
+      <eq>t = 0</eq>, this is the phase <eq>\theta</eq>. Together,
+      <eq>\omega t + \theta</eq> represents the point's phase at some time
+      <eq>t</eq> while <eq>r</eq> represents its magnitude.
+      A complex number can be represented using a complex
+      exponential. We can encode where our point is at time
+      <eq>t</eq> as <eq>x + iy + re^{i(\omega t+\theta)}</eq>.
+      By assuming our circle is centered around the origin, the relation is
+      reduced to <eq>re^{i(\omega t+\theta)}</eq>.
+    </p>
+    <p>
+      We can create an epicycle with two rotating orbits. The first orbit
+      <eq>r_{1}e^{i(\omega_{1}t+\theta_{1})}</eq> is centered at a point
+      traveling around the second orbit
+      <eq>r_{2}e^{i(\omega_{2}t+\theta_{2})}</eq> which is centered at the
+      origin. The equation for a point's position on the first orbit at time <eq>t</eq>
+      is <eq>r_{2}e^{i(\omega_{2}t+\theta_{2})}+r_{1}e^{i(\omega_{1}t+\theta_{1})}</eq>.
+      We can extend this to <eq>K</eq> orbits. The equation will
+      look like <eq>\sum_{k=1}^{K}r_{k}e^{i(\omega_{k}t+\theta_{k})}</eq>. We can
+      factor this to be <eq>\sum_{k=1}^{K}r_{k}e^{i\theta_{k}}e^{i\omega_{k}t}</eq>.
+      Read this way, we can say that our path is the sum of each angular frequency
+      <eq>\omega_{k}</eq>'s contribution <eq>r_{k}e^{i\theta_{k}}</eq>. If we know
+      the path that we want to construct, we will need to figure out the parameters
+      <eq>r_{k},\theta_{k},\omega_{k}</eq> for <eq>K</eq> values of <eq>k</eq>.
+      Breaking up a signal into its base frequencies is the Discrete Fourier Transform.
+    </p>
+    <p>
+      Our desired path or orbit is a complex signal of <eq>N</eq> elements,
+      <eq>x(n)</eq>. The Discrete Fourier Transform (DFT) of this signal is
+      <eq>X_{k} = \sum_{n=0}^{N-1}x(n)e^{-i2\pi kn/N}</eq> for each interger
+      <eq>k</eq>. <eq>X_{k}</eq> is a complex number, so it can be represented
+      as a complex exponential <eq>X_{k} = r_{k}e^{i\theta_{k}}</eq>. Our
+      <eq>X_{k}</eq> can therefore represent <eq>r_{k},\theta_{k}</eq> for one
+      value of <eq>k</eq>. The corresponding frequency is then
+      <eq>\omega_{k}=k/N</eq>. We want to only have <eq>K</eq> of those
+      frequencies. The question is then which range of k to choose. Because
+      lower frequencies are more representative of the path than higher
+      frequencies which may represent noise, we will obtain the <eq>K</eq>
+      lowest frequencies. This means <eq>k \in [-K/2, K/2]</eq>. Doing this, we
+      have obtained the <eq>r_{k},\theta_{k},\omega_{k}</eq> values that are
+      needed to build an epicycle with <eq>K</eq> circles. By looking at the
+      Inverse Discrete Transform (IDFT) that turns our frequency components into
+      an approximation of the original signal,
+      <eq>x(n) = 1/N\sum_{k=-K/2}^{K/2}X_{k}e^{i2\pi kn/N}</eq> we see that it
+      matches our previous summation except for a scaling factor of <eq>1/N</eq>
+      outside of the summation. Each <eq>X_{k}</eq> is constructed by summing
+      <eq>N</eq> values together, so it makes sense to divide each magnitude by
+      <eq>N</eq> to achieve the original signal.
+    </p>
+  </div>
+  <a class="draw-btn visible-md-inline-block visible-lg-inline-block hidden-sm hidden-xs" href="/draw">
+    <div class="btn-tooltip">Draw a path<div class="arrow-right"></div></div>
+    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+  </a>
+  <a class="draw-btn lg visible-sm-inline-block visible-xs-inline-block hidden-md hidden-lg" href="/draw">
+    <div class="btn-tooltip">Draw a path<div class="arrow-right"></div></div>
+    <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+  </a>
+</div>
+<script type="text/javascript" src="/js/out.min.js"></script>
+<script type="text/javascript">
+var launcher = new org.haodev.epicycle.Launcher(org.haodev.epicycle.State.BG);
+</script>
+{{footer}}

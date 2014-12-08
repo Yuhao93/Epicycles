@@ -1,0 +1,7 @@
+{
+  "/": "index.html",
+  "/index": "index.html",
+  "/draw": "draw.html",
+  "/epicycles": "epicycles.html",
+  "/load": "epicycles.html"
+}

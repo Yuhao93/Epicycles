@@ -1,0 +1,29 @@
+task configClosure << {
+  project.ext {
+    closureNamespace = 'org.haodev.epicycle.Launcher'
+    closureSrc = 'client/js'
+    closureGen = 'client/gen'
+    closureExterns = 'client/extern'
+  }
+}
+
+task configSoy << {
+  project.ext {
+    soySrc = 'soy'
+    soyOutput = 'client/gen/soy'
+  }
+}
+
+task configWeb << {
+  project.ext {
+    webCopy = [
+      'project:client/html:.',
+      'project:client/fonts:.',
+      'project:client/css:.',
+      'project:node_modules:.',
+      'project:server:.',
+      'project:package.json:',
+      'project:Procfile:'
+    ]
+  }
+}
